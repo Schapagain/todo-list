@@ -10,8 +10,8 @@ const Task = require('../../models/tasks');
 router.get('/', async (req,res) => {
 
     try{
-        let tasks = await Task.find({});
-
+        const result = await Task.find({});
+        const tasks = result.map(task => getPrettyTask(task));
         res.status(200).json({
             tasks,
         })
@@ -38,16 +38,16 @@ router.post('/', async (req,res) => {
     }
     try{
         const newTask = new Task({title});
-        let transaction = await newTask.save();
+        let result = await newTask.save();
 
         return res.status(200).json({
-            transaction,
+            task: getPrettyTask(result),
         })
     }
     catch(err){
         console.log(err);
         return res.status(500).json({
-            error: 'Could not add a new transaction. Try again later.'
+            error: 'Could not add a new task. Try again later.'
         })
     }
 })
@@ -67,7 +67,7 @@ router.delete('/:taskId', async (req,res) => {
         const result = await Task.findOneAndDelete({_id:taskId})
         if (!result) throw new Error("Can't find that task");
         return res.status(200).json({
-            result,
+            task: getPrettyTask(result),
         })
     }
     catch(err){
@@ -77,5 +77,10 @@ router.delete('/:taskId', async (req,res) => {
         })
     }
 })
+
+const getPrettyTask = task => {
+    const { _id:id, title } = task;
+    return { id,title };
+}
 
 module.exports = router;
