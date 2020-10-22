@@ -22,6 +22,14 @@ app.use((req,res,next) => {
 // Serve API routes
 app.use('/api/tasks',require('./routes/api/tasks'));
 
+// Serve static content in production
+if(process.env.NODE_ENV == "production") {
+    app.use(express.static('public'));
+    app.get('*', (req,res) => {
+        res.sendFile(path.resolve(__dirname, 'public','index.html'));
+    })
+}
+
 // Forward invalid routes to the error handler below
 app.use((req,res,next) => {
     const error = new Error('Not found');
@@ -39,13 +47,5 @@ app.use((error,req,res,next) => {
         }
     });
 });
-
-// Serve static content in production
-if(process.env.NODE_ENV == "production") {
-    app.use(express.static('public'));
-    app.get('*', (req,res) => {
-        res.sendFile(path.resolve(__dirname, 'public','index.html'));
-    })
-}
 
 module.exports = app;
